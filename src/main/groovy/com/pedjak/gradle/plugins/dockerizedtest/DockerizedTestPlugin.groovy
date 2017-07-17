@@ -23,8 +23,7 @@ import com.github.dockerjava.netty.NettyDockerCmdExecFactory
 import org.gradle.api.*
 import org.gradle.internal.concurrent.ExecutorFactory
 import org.gradle.api.tasks.testing.Test
-import org.gradle.internal.progress.BuildOperationExecutor
-import org.gradle.internal.operations.BuildOperationWorkerRegistry
+import org.gradle.internal.operations.BuildOperationExecutor
 import org.gradle.internal.remote.Address
 import org.gradle.internal.remote.ConnectionAcceptor
 import org.gradle.internal.remote.MessagingServer
@@ -67,7 +66,7 @@ class DockerizedTestPlugin implements Plugin<Project> {
             {
 
                 workerSemaphore.applyTo(test.project)
-                test.testExecuter = new TestExecuter(newProcessBuilderFactory(project, extension, test.processBuilderFactory), actorFactory, moduleRegistry, services.get(BuildOperationWorkerRegistry), services.get(BuildOperationExecutor));
+                test.testExecuter = new TestExecuter(newProcessBuilderFactory(project, extension, test.processBuilderFactory), actorFactory, moduleRegistry, services.get(BuildOperationExecutor));
 
                 if (!extension.client)
                 {
@@ -100,12 +99,12 @@ class DockerizedTestPlugin implements Plugin<Project> {
         def execHandleFactory = [newJavaExec: { -> new DockerizedJavaExecHandleBuilder(extension, project.fileResolver, workerSemaphore)}] as JavaExecHandleFactory
         new DefaultWorkerProcessFactory(defaultProcessBuilderFactory.workerLogLevel,
                                         messagingServer,
-                                        defaultProcessBuilderFactory.workerFactory.classPathRegistry,
+                                        defaultProcessBuilderFactory.workerImplementationFactory.classPathRegistry,
                                         defaultProcessBuilderFactory.idGenerator,
                                         defaultProcessBuilderFactory.gradleUserHomeDir,
-                                        defaultProcessBuilderFactory.workerFactory.temporaryFileProvider,
+                                        defaultProcessBuilderFactory.workerImplementationFactory.temporaryFileProvider,
                                         execHandleFactory,
-                                        defaultProcessBuilderFactory.workerFactory.jvmVersionDetector,
+                                        defaultProcessBuilderFactory.workerImplementationFactory.jvmVersionDetector,
                                         defaultProcessBuilderFactory.outputEventListener,
                                         memoryManager
                                         )
