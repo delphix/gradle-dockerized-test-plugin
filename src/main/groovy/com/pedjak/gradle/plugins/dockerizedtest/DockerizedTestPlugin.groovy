@@ -24,6 +24,7 @@ import org.gradle.api.*
 import org.gradle.internal.concurrent.ExecutorFactory
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.operations.BuildOperationExecutor
+import org.gradle.internal.work.WorkerLeaseRegistry
 import org.gradle.internal.remote.Address
 import org.gradle.internal.remote.ConnectionAcceptor
 import org.gradle.internal.remote.MessagingServer
@@ -66,7 +67,8 @@ class DockerizedTestPlugin implements Plugin<Project> {
             {
 
                 workerSemaphore.applyTo(test.project)
-                test.testExecuter = new TestExecuter(newProcessBuilderFactory(project, extension, test.processBuilderFactory), actorFactory, moduleRegistry, services.get(BuildOperationExecutor));
+                test.testExecuter = new TestExecuter(newProcessBuilderFactory(project, extension, test.processBuilderFactory), actorFactory, moduleRegistry, services.get(BuildOperationExecutor),
+                        services.get(WorkerLeaseRegistry));
 
                 if (!extension.client)
                 {
