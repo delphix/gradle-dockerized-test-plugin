@@ -25,6 +25,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.dockerjava.api.DockerClient;
+import com.google.common.base.Joiner;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.AttachContainerResultCallback;
@@ -33,12 +34,14 @@ import groovy.lang.Closure;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.internal.concurrent.DefaultExecutorFactory;
-import org.gradle.internal.concurrent.StoppableExecutor;
+import org.gradle.internal.concurrent.ManagedExecutor;
 import org.gradle.internal.event.ListenerBroadcast;
 import org.gradle.process.ExecResult;
 import org.gradle.process.internal.*;
 import org.gradle.process.internal.shutdown.ShutdownHookActionRegister;
 import org.gradle.process.internal.streams.StreamsHandler;
+
+import static java.lang.String.format;
 
 public class DockerizedExecHandle implements ExecHandle, ProcessSettings
 {
@@ -65,7 +68,7 @@ public class DockerizedExecHandle implements ExecHandle, ProcessSettings
     private final StreamsHandler streamsHandler;
     private final boolean redirectErrorStream;
     private final DefaultExecutorFactory executorFactory = new DefaultExecutorFactory();
-    private final StoppableExecutor executor;
+    private final ManagedExecutor executor;
     private int timeoutMillis;
     private boolean daemon;
 
@@ -195,7 +198,7 @@ public class DockerizedExecHandle implements ExecHandle, ProcessSettings
             lock.unlock();
         }
 
-        LOGGER.debug("Process '{}' finished with exit value {} (state: {})", displayName, exitValue, newState);
+        LOGGER.debug("Process '{}' finished with exit value {} (currentstate: {} newstate: {})", displayName, exitValue, currentState, newState);
 
         if (currentState != ExecHandleState.DETACHED && newState != ExecHandleState.DETACHED) {
             broadcast.getSource().executionFinished(this, result);
@@ -289,8 +292,8 @@ public class DockerizedExecHandle implements ExecHandle, ProcessSettings
         cmd.withVolumes(volumes).withBinds(binds);
     }
     public ExecHandle start() {
-//        LOGGER.info("Starting process '{}'. Working directory: {} Command: {}",
-//                displayName, directory, command + ' ' + Joiner.on(' ').useForNull("null").join(arguments));
+        LOGGER.debug("Starting process '{}'. Working directory: {} Command: {}",
+                displayName, directory, command + ' ' + Joiner.on(' ').useForNull("null").join(arguments));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Environment for process '{}': {}", displayName, environment);
         }
@@ -317,7 +320,7 @@ public class DockerizedExecHandle implements ExecHandle, ProcessSettings
                 execResult.rethrowFailure();
             }
 
-            LOGGER.info("Successfully started process '{}'", displayName);
+            LOGGER.debug("Successfully started process '{}'", displayName);
         } finally {
             lock.unlock();
         }
@@ -435,6 +438,9 @@ public class DockerizedExecHandle implements ExecHandle, ProcessSettings
         }
 
         public ExecResult assertNormalExitValue() throws ExecException {
+            if (exitValue != 0) {
+                throw new ExecException(format("Process '%s' finished with non-zero exit value %d", displayName, exitValue));
+            }
             // all exit values are ok
             return this;
         }

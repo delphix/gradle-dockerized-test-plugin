@@ -19,7 +19,7 @@ import org.gradle.process.internal.worker.WorkerProcessBuilder;
 import org.gradle.process.internal.worker.WorkerProcessFactory;
 import org.gradle.util.CollectionUtils;
 
-public class ForkingTestClassProcessor implements TestClassProcessor
+public class CustomForkingTestClassProcessor implements TestClassProcessor
 {
     private final WorkerProcessFactory workerFactory;
     private final WorkerTestClassProcessorFactory processorFactory;
@@ -31,7 +31,7 @@ public class ForkingTestClassProcessor implements TestClassProcessor
     private WorkerProcess workerProcess;
     private TestResultProcessor resultProcessor;
 
-    public ForkingTestClassProcessor(WorkerProcessFactory workerFactory, WorkerTestClassProcessorFactory processorFactory, JavaForkOptions options, Iterable<File> classPath, Action<WorkerProcessBuilder> buildConfigAction, ModuleRegistry moduleRegistry) {
+    public CustomForkingTestClassProcessor(WorkerProcessFactory workerFactory, WorkerTestClassProcessorFactory processorFactory, JavaForkOptions options, Iterable<File> classPath, Action<WorkerProcessBuilder> buildConfigAction, ModuleRegistry moduleRegistry) {
         this.workerFactory = workerFactory;
         this.processorFactory = processorFactory;
         this.options = options;
@@ -106,7 +106,7 @@ public class ForkingTestClassProcessor implements TestClassProcessor
                 moduleRegistry.getExternalModule("kryo").getImplementationClasspath().getAsURLs(),
                 moduleRegistry.getExternalModule("commons-lang").getImplementationClasspath().getAsURLs(),
                 moduleRegistry.getExternalModule("junit").getImplementationClasspath().getAsURLs(),
-                ForkingTestClassProcessor.class.getProtectionDomain().getCodeSource().getLocation()
+                CustomForkingTestClassProcessor.class.getProtectionDomain().getCodeSource().getLocation()
         );
     }
 

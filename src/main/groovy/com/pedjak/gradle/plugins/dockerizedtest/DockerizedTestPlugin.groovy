@@ -24,6 +24,7 @@ import org.gradle.api.*
 import org.gradle.internal.concurrent.ExecutorFactory
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.operations.BuildOperationExecutor
+import org.gradle.internal.work.WorkerLeaseRegistry
 import org.gradle.internal.remote.Address
 import org.gradle.internal.remote.ConnectionAcceptor
 import org.gradle.internal.remote.MessagingServer
@@ -66,7 +67,8 @@ class DockerizedTestPlugin implements Plugin<Project> {
             {
 
                 workerSemaphore.applyTo(test.project)
-                test.testExecuter = new TestExecuter(newProcessBuilderFactory(project, extension, test.processBuilderFactory), actorFactory, moduleRegistry, services.get(BuildOperationExecutor));
+                test.testExecuter = new TestExecuter(newProcessBuilderFactory(project, extension, test.processBuilderFactory), actorFactory, moduleRegistry, services.get(BuildOperationExecutor),
+                        services.get(WorkerLeaseRegistry));
 
                 if (!extension.client)
                 {
@@ -97,7 +99,7 @@ class DockerizedTestPlugin implements Plugin<Project> {
     def newProcessBuilderFactory(project, extension, defaultProcessBuilderFactory) {
 
         def execHandleFactory = [newJavaExec: { -> new DockerizedJavaExecHandleBuilder(extension, project.fileResolver, workerSemaphore)}] as JavaExecHandleFactory
-        new DefaultWorkerProcessFactory(defaultProcessBuilderFactory.workerLogLevel,
+        new DefaultWorkerProcessFactory(defaultProcessBuilderFactory.loggingManager,
                                         messagingServer,
                                         defaultProcessBuilderFactory.workerImplementationFactory.classPathRegistry,
                                         defaultProcessBuilderFactory.idGenerator,
