@@ -21,6 +21,7 @@ class DockerizedTestExtension {
     String image
     Map volumes
     String user
+    String network
 
     Closure beforeContainerCreate
 
