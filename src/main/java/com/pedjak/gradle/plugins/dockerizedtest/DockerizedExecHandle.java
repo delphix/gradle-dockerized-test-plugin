@@ -229,6 +229,9 @@ public class DockerizedExecHandle implements ExecHandle, ProcessSettings
             createCmd.withEnv(getEnv());
 
             String user = testExtension.getUser();
+            String network = testExtension.getNetwork();
+            if (network != null)
+                createCmd.withNetworkMode(network);
             if (user != null)
                 createCmd.withUser(user);
             bindVolumes(createCmd);

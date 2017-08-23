@@ -60,6 +60,7 @@ class DockerizedTestPlugin implements Plugin<Project> {
         ext.volumes = [ "$startParameter.gradleUserHomeDir": "$startParameter.gradleUserHomeDir",
                         "$project.projectDir":"$project.projectDir"]
         ext.user = currentUser
+        ext.network = null
         test.doFirst {
             def extension = test.extensions.docker
 
