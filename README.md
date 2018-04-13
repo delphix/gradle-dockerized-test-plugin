@@ -1,6 +1,8 @@
 [![Download](https://api.bintray.com/packages/pedjak/gradle-plugins/dockerized-test/images/download.svg) ](https://bintray.com/pedjak/gradle-plugins/dockerized-test/_latestVersion)
 [![license](https://img.shields.io/github/license/pedjak/gradle-dockerized-test-plugin.svg)]()
 
+NOTE: This repository is archived and no longer maintained.
+
 What
 ====
 
